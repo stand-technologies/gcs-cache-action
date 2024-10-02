@@ -4,10 +4,11 @@
   "description": "Cache your workload to a Google Cloud Storage bucket",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "lint": "npx @biomejs/biome check ./src",
+    "build:main": "ncc build src/main.ts --out dist/main --minify",
+    "build:post": "ncc build src/post.ts --out dist/post --minify",
+    "lint": "tsc --noEmit && npx @biomejs/biome check ./src",
     "lint:fix": "npx @biomejs/biome check --write ./src",
-    "package": "npm run build && ncc build lib/main.js -m -o dist/main && ncc build lib/post.js -m -o dist/post",
+    "package": "pnpm build:main && pnpm build:post",
     "test": "echo \"no test specified\" && exit 0",
     "prepare": "husky",
     "release": "np --message=\"chore: v%s\""
@@ -53,7 +54,7 @@
     "@types/node": "^20.0.0",
     "@types/semver": "7.5.8",
     "@types/tmp": "0.2.6",
-    "@vercel/ncc": "0.36.1",
+    "@vercel/ncc": "0.38.2",
     "husky": "9.1.6",
     "lint-staged": "15.2.10",
     "np": "10.0.7",
