@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { Storage, File, Bucket } from '@google-cloud/storage';
+import { type Bucket, type File, Storage } from '@google-cloud/storage';
 import { withFile as withTemporaryFile } from 'tmp-promise';
 
-import { ObjectMetadata } from './gcs-utils';
+import type { ObjectMetadata } from './gcs-utils';
 import { getInputs } from './inputs';
-import { CacheHitKindState, saveState } from './state';
+import { type CacheHitKindState, saveState } from './state';
 import { extractTar } from './tar-utils';
 
 async function getBestMatch(
@@ -28,9 +28,9 @@ async function getBestMatch(
   if (exactFileExists) {
     console.log(`🙌 Found exact match from cache for key '${key}'.`);
     return [exactFile, 'exact'];
-  } else {
-    console.log(`🔸 No exact match found for key '${key}'.`);
   }
+
+  console.log(`🔸 No exact match found for key '${key}'.`);
 
   const bucketFiles = await bucket
     .getFiles({
@@ -39,8 +39,8 @@ async function getBestMatch(
     .then(([files]) =>
       files.sort(
         (a, b) =>
-          new Date((b.metadata as ObjectMetadata).updated).getTime() -
-          new Date((a.metadata as ObjectMetadata).updated).getTime(),
+          new Date((b.metadata as unknown as ObjectMetadata).updated).getTime() -
+          new Date((a.metadata as unknown as ObjectMetadata).updated).getTime(),
       ),
     )
     .catch((err) => {
@@ -54,7 +54,7 @@ async function getBestMatch(
         bucketFiles.map((f) => ({
           name: f.name,
           metadata: {
-            updated: (f.metadata as ObjectMetadata).updated,
+            updated: (f.metadata as unknown as ObjectMetadata).updated,
           },
         })),
       )}.`,
@@ -62,18 +62,14 @@ async function getBestMatch(
   }
 
   for (const restoreKey of restoreKeys) {
-    const foundFile = bucketFiles.find((file) =>
-      file.name.startsWith(`${folderPrefix}/${restoreKey}`),
-    );
+    const foundFile = bucketFiles.find((file) => file.name.startsWith(`${folderPrefix}/${restoreKey}`));
 
     if (foundFile) {
       console.log(`🤝 Found match from cache for restore key '${restoreKey}'.`);
       return [foundFile, 'partial'];
-    } else {
-      console.log(
-        `🔸 No cache candidate found for restore key '${restoreKey}'.`,
-      );
     }
+
+    console.log(`🔸 No cache candidate found for restore key '${restoreKey}'.`);
   }
 
   return [null, 'none'];
@@ -86,9 +82,8 @@ async function main() {
   const folderPrefix = `${github.context.repo.owner}/${github.context.repo.repo}`;
   const exactFileName = `${folderPrefix}/${inputs.key}.tar`;
 
-  const [bestMatch, bestMatchKind] = await core.group(
-    '🔍 Searching the best cache archive available',
-    () => getBestMatch(bucket, inputs.key, inputs.restoreKeys),
+  const [bestMatch, bestMatchKind] = await core.group('🔍 Searching the best cache archive available', () =>
+    getBestMatch(bucket, inputs.key, inputs.restoreKeys),
   );
 
   core.debug(`Best match kind: ${bestMatchKind}.`);
@@ -109,7 +104,7 @@ async function main() {
 
   const bestMatchMetadata = await bestMatch
     .getMetadata()
-    .then(([metadata]) => metadata as ObjectMetadata)
+    .then(([metadata]) => metadata as unknown as ObjectMetadata)
     .catch((err) => {
       core.error('Failed to read object metadatas');
       throw err;
@@ -117,8 +112,7 @@ async function main() {
 
   core.debug(`Best match metadata: ${JSON.stringify(bestMatchMetadata)}.`);
 
-  const compressionMethod =
-    bestMatchMetadata?.metadata?.['Cache-Action-Compression-Method'];
+  const compressionMethod = bestMatchMetadata?.metadata?.['Cache-Action-Compression-Method'];
 
   core.debug(`Best match compression method: ${compressionMethod}.`);
 
@@ -152,9 +146,7 @@ async function main() {
       });
 
     await core
-      .group('🗜️ Extracting cache archive', () =>
-        extractTar(tmpFile.path, compressionMethod, workspace),
-      )
+      .group('🗜️ Extracting cache archive', () => extractTar(tmpFile.path, compressionMethod, workspace))
       .catch((err) => {
         core.error('Failed to extract the archive');
         throw err;

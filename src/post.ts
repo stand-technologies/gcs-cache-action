@@ -1,10 +1,10 @@
+import * as path from 'node:path';
 import * as core from '@actions/core';
 import * as glob from '@actions/glob';
 import { Storage } from '@google-cloud/storage';
-import * as path from 'path';
 import { withFile as withTemporaryFile } from 'tmp-promise';
 
-import { CacheActionMetadata } from './gcs-utils';
+import type { CacheActionMetadata } from './gcs-utils';
 import { getState } from './state';
 import { createTar } from './tar-utils';
 
@@ -12,9 +12,7 @@ async function main() {
   const state = getState();
 
   if (state.cacheHitKind === 'exact') {
-    console.log(
-      '🌀 Skipping uploading cache as the cache was hit by exact match.',
-    );
+    console.log('🌀 Skipping uploading cache as the cache was hit by exact match.');
     return;
   }
 
@@ -31,9 +29,7 @@ async function main() {
   core.debug(`Target file name: ${targetFileName}.`);
 
   if (targetFileExists) {
-    console.log(
-      '🌀 Skipping uploading cache as it already exists (probably due to another job).',
-    );
+    console.log('🌀 Skipping uploading cache as it already exists (probably due to another job).');
     return;
   }
 
@@ -42,17 +38,13 @@ async function main() {
     implicitDescendants: false,
   });
 
-  const paths = await globber
-    .glob()
-    .then((files) => files.map((file) => path.relative(workspace, file)));
+  const paths = await globber.glob().then((files) => files.map((file) => path.relative(workspace, file)));
 
   core.debug(`Paths: ${JSON.stringify(paths)}.`);
 
   return withTemporaryFile(async (tmpFile) => {
     const compressionMethod = await core
-      .group('🗜️ Creating cache archive', () =>
-        createTar(tmpFile.path, paths, workspace),
-      )
+      .group('🗜️ Creating cache archive', () => createTar(tmpFile.path, paths, workspace))
       .catch((err) => {
         core.error('Failed to create the archive');
         throw err;

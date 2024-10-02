@@ -28,7 +28,7 @@ contain your target Google Cloud Storage bucket. **As simple as that.**
 
 - name: Cache the node_modules
   id: node-modules-cache
-  uses: mansagroup/gcs-cache-action@v2
+  uses: stand-technologies/gcs-cache-action@v2
   with:
     bucket: my-ci-cache
     path: node_modules
@@ -77,7 +77,7 @@ This GitHub action will output the following values:
 
 - name: Cache the node_modules and npm cache
   id: node-modules-cache
-  uses: mansagroup/gcs-cache-action@v2
+  uses: stand-technologies/gcs-cache-action@v2
   with:
     bucket: my-ci-cache
     path: |
@@ -154,23 +154,3 @@ the following the following path:
 ## License
 
 This project is [MIT licensed](LICENSE.txt).
-
-## Contributors
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://jeremylvln.fr/"><img src="https://avatars.githubusercontent.com/u/6763873?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jérémy Levilain</b></sub></a><br /><a href="https://github.com/MansaGroup/gcs-cache-action/commits?author=IamBlueSlime" title="Code">💻</a> <a href="https://github.com/MansaGroup/gcs-cache-action/commits?author=IamBlueSlime" title="Documentation">📖</a> <a href="#ideas-IamBlueSlime" title="Ideas, Planning, & Feedback">🤔</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

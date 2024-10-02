@@ -1,4 +1,4 @@
-import { CompressionMethod } from './tar-utils';
+import type { CompressionMethod } from './tar-utils';
 
 export interface ObjectMetadata {
   updated: string;
